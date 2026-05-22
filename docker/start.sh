@@ -1,7 +1,18 @@
 #!/bin/bash
-# Replace port 80 with Railway's PORT variable
 PORT=${PORT:-80}
-sed -i "s/Listen 80/Listen $PORT/" /etc/apache2/ports.conf
-sed -i "s/<VirtualHost \*:80>/<VirtualHost *:$PORT>/" /etc/apache2/sites-enabled/000-default.conf
-echo "Starting Apache on port $PORT"
+echo "Configuring Apache for port $PORT"
+cat > /etc/apache2/ports.conf << PORTS
+Listen $PORT
+PORTS
+cat > /etc/apache2/sites-enabled/000-default.conf << VHOST
+<VirtualHost *:$PORT>
+    DocumentRoot /var/www/html
+    DirectoryIndex index.php
+    <Directory /var/www/html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+VHOST
 exec apache2-foreground
