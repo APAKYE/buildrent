@@ -1,17 +1,17 @@
 #!/bin/bash
-PORT=${PORT:-80}
-echo "Configuring Apache for port $PORT"
+# Get Railway's port or default to 8080
+PORT="${PORT:-8080}"
+echo "=== BuildRent Starting ==="
+echo "PORT variable is: $PORT"
 
-# Fix MPM conflict - disable mpm_event, enable mpm_prefork
+# Disable mpm_event, enable mpm_prefork
 a2dismod mpm_event 2>/dev/null || true
 a2enmod mpm_prefork 2>/dev/null || true
 
-# Rewrite ports config
-cat > /etc/apache2/ports.conf << PORTS
-Listen $PORT
-PORTS
+# Write ports config
+echo "Listen $PORT" > /etc/apache2/ports.conf
 
-# Rewrite virtual host config
+# Write virtual host
 cat > /etc/apache2/sites-enabled/000-default.conf << VHOST
 <VirtualHost *:$PORT>
     DocumentRoot /var/www/html
@@ -24,5 +24,5 @@ cat > /etc/apache2/sites-enabled/000-default.conf << VHOST
 </VirtualHost>
 VHOST
 
-echo "Starting Apache on port $PORT"
+echo "=== Starting Apache on port $PORT ==="
 exec apache2-foreground
